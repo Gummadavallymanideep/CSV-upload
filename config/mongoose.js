@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost/upload-files');
+mongoose.connect('mongodb+srv://deep:Mani24@projectcluster.tx9gp0v.mongodb.net/?retryWrites=true&w=majority');
 
 const db = mongoose.connection;
 
