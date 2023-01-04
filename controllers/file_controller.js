@@ -1,74 +1,90 @@
 const CSV = require('../models/csv');
-// const multer = require('multer');  //using multer for file upload
-// const path = require('path');      
-// const csv = require('csv-parser');  //using csv-parser to convert the data into JSON format
-// const fs = require('fs');
+const multer = require('multer');  //using multer for file upload
+const path = require('path');      
+const csv = require('csv-parser');  //using csv-parser to convert the data into JSON format
+const fs = require('fs');
 const uploadedFileNames = [];        //array containing the names of the uploaded files
 
-// //setting up multer storage
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//       cb(null, path.join(__dirname,'../','/uploads'));
-//     },
-//     filename: function (req, file, cb) {
-//       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-//       cb(null, file.originalname + '-' + uniqueSuffix)
-//     }
-//   });
+//setting up multer storage
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname,'../','/uploads'));
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.originalname + '-' + uniqueSuffix)
+    }
+  });
 
-// //setting up file-filter to upload only (.csv) files
-// function fileFilter (req, file, cb) {
+//setting up file-filter to upload only (.csv) files
+function fileFilter (req, file, cb) {
 
-//     if(file.mimetype == 'text/csv'){
-//         cb(null,true);
-//     }
-//     else{
-//         console.log("File is not csv type");
-//         cb(null,false);
-//     }
-//   }
+    if(file.mimetype == 'text/csv'){
+        cb(null,true);
+    }
+    else{
+        console.log("File is not csv type");
+        cb(null,false);
+    }
+  }
 
-// const upload = multer({storage:storage,fileFilter:fileFilter}).single('uploaded_file');  //initializing multer
+ const upload = multer({storage:storage,fileFilter:fileFilter}).single('uploaded_file');  //initializing multer
 
 //for uploading the file to the uploads folder
-module.exports.upload = async function(req,res){
-    // upload(req,res,function(err){
-    //     if(err){
-    //         console.log("****Multer error",err);
-    //         return;
-    //     }
-    //     else if(err){
-    //         console.log('multer error',err);
-    //         return;
-    //     }
-    //     else if(req.file){
-    //         uploadedFileNames.push(req.file.filename);
-    //     }
-    //     return res.redirect('back');
-    // });
-
-    try{
-
-      // let csv = await CSV.findById(req.params.id);
-      await CSV.uploadCSV(req, res, function(err){
-        if (err) {console.log('*****Multer Error: ', err)}
-  
-        filename = req.body.filename;
-  
-        if(req.file){
-  
-          // this is saving the path of the uploaded file into the avatar field in the user
-          file = CSV.csvPath + '/' + req.file.filename;
-  
+module.exports.upload =  function(req,res,next){
+    upload(req,res,function(err){
+        if(err){
+            console.log("****Multer error",err);
+            return;
         }
-        // save();
-        return res.redirect('back');
-      });
+        else if(err){
+            console.log('multer error',err);
+            return;
+        }
+        else if(req.file){
+            uploadedFileNames.push(req.file.filename);
+        }
+        next();
+    });
 
-    }catch(err){
-      console.log('error', err);
-      return res.redirect('back');
-    }
+    // try{
+
+    //   let csv = await CSV.findById(req.params.id);
+    //   await CSV.uploadCSV(req, res, function(err){
+    //     if (err) {console.log('*****Multer Error: ', err)}
+  
+    //     filename = req.body.filename;
+  
+    //     if(req.file){
+  
+    //       // this is saving the path of the uploaded file into the avatar field in the user
+    //       file = CSV.csvPath + '/' + req.file.filename;
+
+    //       CSV.create({'filename':file},function(err,data){
+    //         console.log('ee',err);
+    //         console.log('a',data);
+    //         return res.redirect('back');
+    //       });
+        
+    //     }
+    //     // save();
+        
+    //   });
+
+      
+
+    //   return res.redirect('back');
+
+    // }catch(err){
+    //   console.log('error', err);
+    //   return res.redirect('back');
+    // }
+}
+
+module.exports.createFile = async function(req,res){
+  let data = await CSV.create({'filename':req.file.filename});
+  console.log('a',data);
+  return res.redirect('back');
 }
 
 //exporting array 
@@ -102,4 +118,15 @@ module.exports.delete = function(req,res){
     }
     uploadedFileNames.splice(index,1);
     return res.redirect('back');
+}
+
+
+module.exports.deleteFile = function(req, res){
+  let id = req.query.id;
+  CSV.findByIdAndDelete(id, function(err){
+    if(err){
+      console.log("Error in delete the file");
+    }
+    return res.redirect('back');
+  });
 }
