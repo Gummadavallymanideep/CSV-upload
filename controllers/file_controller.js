@@ -121,12 +121,16 @@ module.exports.delete = function(req,res){
 }
 
 
-module.exports.deleteFile = function(req, res){
-  let id = req.query.id;
-  CSV.findByIdAndDelete(id, function(err){
-    if(err){
-      console.log("Error in delete the file");
-    }
-    return res.redirect('back');
-  });
+// This function helps in deleting a habit from list.
+module.exports.deleteFile = function (request, response) {
+  let id = request.query.id;
+  Habit.findByIdAndDelete(id, function (err) {
+      if (err) {
+          console.log("error in deletion");
+          return;
+      }
+      else {
+          return response.redirect('back');
+      }
+  })
 }
