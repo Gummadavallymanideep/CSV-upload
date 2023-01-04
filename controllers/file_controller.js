@@ -120,17 +120,3 @@ module.exports.delete = function(req,res){
     return res.redirect('back');
 }
 
-
-// This function helps in deleting a habit from list.
-module.exports.deleteFile = function (request, response) {
-  let id = request.query.id;
-  Habit.findByIdAndDelete(id, function (err) {
-      if (err) {
-          console.log("error in deletion");
-          return;
-      }
-      else {
-          return response.redirect('back');
-      }
-  })
-}
